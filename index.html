@@ -1,0 +1,536 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>
+		<style>
+    /* Adjusted Navbar Gradient to Match Theme */
+    .navbar {
+        background: linear-gradient(to right, #0f172a, #a855f7, #00ff00);
+        transition: all 0.3s;
+    }
+    .navbar.scrolled {
+        background: linear-gradient(to right, #0f172a, #a855f7);
+        box-shadow: 0 4px 6px rgba(0, 255, 0, 0.2);
+    }
+    /* Responsive Navbar Gradient for Mobile */
+    @media (max-width: 768px) {
+        .nav-links {
+            max-height: 0;
+            overflow: hidden;
+            flex-direction: column;
+            position: absolute;
+            top: 64px;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to bottom, #0f172a, #a855f7, #00ff00);
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+    }
+    /* Adjusted About Section Spacing */
+    .about-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #a855f7;
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        opacity: 0;
+        transform: scale(0.8);
+        animation: fadeInScale 1s ease forwards 0.5s;
+    }
+    .flex.items-center.space-x-4 {
+        display: flex;
+        align-items: center;
+        gap: 1rem; /* Reduced spacing between image and text */
+    }
+    .glass.p-6.rounded-lg.flex-1 {
+        padding: 1.5rem; /* Reduced padding for compact look */
+        margin: 0; /* Removed extra margin */
+    }
+</style>
+		<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanjay Gaikwad - Portfolio</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            cursor: none;
+        }
+        .custom-cursor {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(45deg, #00ff00, #a855f7);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.5); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        .section {
+            padding: 5rem 2rem;
+            position: relative;
+        }
+        .header-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .header-img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.8);
+        }
+        .hero-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid transparent;
+            background: linear-gradient(45deg, #00ff00, #a855f7);
+            background-size: 200%;
+            animation: gradient 3s ease infinite;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            transition: transform 0.5s;
+        }
+        .hero-img:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .about-img {
+            width: 250px;
+            height: 350px;
+            /*border-radius: 50%;*/
+            object-fit: cover;
+            border: 4px solid #a855f7;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            opacity: 0;
+            transform: scale(0.8);
+            animation: fadeInScale 1s ease forwards 0.5s;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes fadeInScale {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .navbar {
+            background: linear-gradient(to right, #1e40af, #a855f7);
+            transition: all 0.3s;
+        }
+        .navbar.scrolled {
+            background: #1e3a8a;
+            box-shadow: 0 4px 6px rgba(0, 255, 0, 0.2);
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            transition: transform 0.4s, box-shadow 0.4s;
+        }
+        .project-card:hover {
+            transform: translateY(-10px) rotate(2deg);
+            box-shadow: 0 10px 20px rgba(0, 255, 0, 0.4);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .typing {
+            border-right: 2px solid #00ff00;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 10s steps(40) infinite, blink 1.90s step-end infinite;
+        }
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 0, 0.1);
+        }
+        .glow-button {
+            background: linear-gradient(45deg, #00ff00, #a855f7);
+            background-size: 200%;
+            animation: gradient 3s ease infinite;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        .glow-button:hover {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+        }
+        /* Responsive Navbar */
+        .nav-links {
+            transition: all 0.3s ease;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: #ffffff;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .nav-open .nav-links {
+            max-height: 300px;
+        }
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+            .nav-links {
+                max-height: 0;
+                overflow: hidden;
+                flex-direction: column;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                width: 100%;
+                background: linear-gradient(to bottom, #1e40af, #a855f7);
+                text-align: center;
+                padding: 1rem 0;
+            }
+            .nav-links a {
+                padding: 0.5rem 0;
+                display: block;
+            }
+            .nav-open .hamburger span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            .nav-open .hamburger span:nth-child(2) {
+                opacity: 0;
+            }
+            .nav-open .hamburger span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -7px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor"></div>
+
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar text-white p-4 sticky top-0 shadow-lg z-20">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="myphoto3.jpg" alt="Sanjay Gaikwad" class="header-img">
+                <h1 class="text-xl font-bold">Sanjay G.</h1>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links flex space-x-6 md:flex-row flex-col md:static md:max-height-none md:bg-transparent">
+                <a href="#home" class="hover:text-green-400 transition">Home</a>
+                <a href="#about" class="hover:text-green-400 transition">About</a>
+                <a href="#skills" class="hover:text-green-400 transition">Skills</a>
+                <a href="#about" class="hover:text-green-400 transition">About</a>
+                <a href="#experience" class="hover:text-green-400 transition">Experience</a>
+                <a href="#projects" class="hover:text-green-400 transition">Projects</a>
+                <a href="#contact" class="hover:text-green-400 transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Photo -->
+    <section id="home" class="section text-center relative">
+        <div class="container mx-auto">
+            <img src="myphoto3.jpg" alt="Sanjay Gaikwad" class="hero-img mx-auto mb-6">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Sanjay Gaikwad</h2>
+            <p class="text-xl md:text-2xl mb-4 typing">Cloud & Project Management Professional | AWS | AI Enthusiast</p>
+            <p class="text-lg mb-6 max-w-2xl mx-auto glass p-4 rounded-lg">
+                Over 10 years of experience delivering scalable web and cloud solutions, now transitioning to project management and AI-driven roles in MNCs.
+            </p>
+            <a href="#contact" class="glow-button text-white px-6 py-3 rounded-full font-semibold transition">Get in Touch</a>
+        </div>
+    </section>
+
+    <!-- About Section with Photo -->
+    <section id="about" class="section bg-gray-900">
+        <div class="container mx-auto fade-in">
+            <h2 class="text-3xl font-bold mb-4 text-green-400">About Me</h2>
+            <div class="flex items-center space-x-4">
+                <img src="myphoto2.jpg" alt="Sanjay Gaikwad" class="about-img">
+                <p class="text-lg glass p-6 rounded-lg flex-1">
+                    I am a seasoned IT professional with 10+ years of experience in web development, cloud infrastructure management (AWS/WHM), and project coordination. At MITSDE, I led the development and maintenance of web applications and cloud systems, ensuring high performance and scalability. Passionate about project management, team leadership, and integrating AI into enterprise solutions, I am currently upskilling in AWS certifications and Agile methodologies to drive impactful projects in MNCs.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section">
+        <div class="container mx-auto fade-in">
+            <h2 class="text-3xl font-bold mb-4 text-green-400">Skills</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">Cloud Technologies</h3>
+                    <ul class="list-disc pl-5">
+                        <li>AWS (EC2, S3, RDS, CloudWatch)</li>
+                        <li>WHM</li>
+                        <li>Cloud Migration</li>
+                    </ul>
+                </div>
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">Project Management</h3>
+                    <ul class="list-disc pl-5">
+                        <li>Agile/Scrum</li>
+                        <li>Team Leadership</li>
+                        <li>Stakeholder Coordination</li>
+                    </ul>
+                </div>
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">Technical Skills</h3>
+                    <ul class="list-disc pl-5">
+                        <li>PHP, HTML, CSS, JavaScript, jQuery</li>
+                        <li>MySQL, SQL</li>
+                        <li>CodeIgniter, WordPress, Joomla</li>
+                    </ul>
+                </div>
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">AI Exposure</h3>
+                    <ul class="list-disc pl-5">
+                        <li>Google Cloud AI APIs</li>
+                        <li>Predictive Analytics</li>
+                        <li>Basic ML Concepts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="section bg-gray-900">
+        <div class="container mx-auto fade-in">
+            <h2 class="text-3xl font-bold mb-4 text-green-400">Experience</h2>
+            <div class="mb-6 project-card p-6 rounded-lg">
+                <h3 class="text-xl font-semibold text-green-300">Senior Software Developer, MITSDE, Pune</h3>
+                <p class="text-gray-400">June 2016 – Present</p>
+                <ul class="list-disc pl-5">
+                    <li>Led AWS/WHM infrastructure management for web applications (mitsde.com, elibrary.mitsde.com), achieving 99.9% uptime.</li>
+                    <li>Developed PHP-based dashboards (TMS) for MIS and digital marketing teams, boosting productivity by 20%.</li>
+                    <li>Coordinated with vendors for LMS (Edmingle) and ERP (Zestorm) integrations, streamlining operations.</li>
+                    <li>Mentored junior developers and managed cross-functional project deliverables.</li>
+                </ul>
+            </div>
+            <div class="mb-6 project-card p-6 rounded-lg">
+                <h3 class="text-xl font-semibold text-green-300">Software Developer, Blue Planet Info Solutions, Pune</h3>
+                <p class="text-gray-400">June 2015 – September 2016</p>
+                <ul class="list-disc pl-5">
+                    <li>Built SmartCookie Reward Point System (smartcookie.in), supporting 10,000+ monthly user interactions.</li>
+                    <li>Collaborated with stakeholders to ensure seamless system integration.</li>
+                </ul>
+            </div>
+            <div class="project-card p-6 rounded-lg">
+                <h3 class="text-xl font-semibold text-green-300">Software Developer, Vision Websters, Pune</h3>
+                <p class="text-gray-400">January 2013 – May 2015</p>
+                <ul class="list-disc pl-5">
+                    <li>Delivered 10+ web applications using PHP, HTML, CSS, and JavaScript, meeting client requirements.</li>
+                    <li>Optimized MySQL databases, reducing query execution time by 15%.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section">
+        <div class="container mx-auto fade-in">
+            <h2 class="text-3xl font-bold mb-4 text-green-400">Projects</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">AWS Web App Deployment</h3>
+                    <p>Deployed a scalable web application on AWS EC2 with CloudFormation and CloudWatch monitoring, ensuring high availability.</p>
+                    <a href="https://github.com/[YourGitHubUsername]/aws-project" class="text-green-400 hover:underline">View on GitHub</a>
+                </div>
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">AI-Integrated Analytics Dashboard</h3>
+                    <p>Built a prototype dashboard using Google Cloud AI API for predictive analytics, showcasing AI integration in enterprise solutions.</p>
+                    <a href="https://github.com/[YourGitHubUsername]/ai-dashboard" class="text-green-400 hover:underline">View on GitHub</a>
+                </div>
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">Student Admission Panel (MITSDE)</h3>
+                    <p>Developed a secure PHP-based portal (mitsde.com/apply/register) handling 500+ monthly registrations.</p>
+                    <a href="https://mitsde.com/apply/register/index.php" class="text-green-400 hover:underline">View Project</a>
+                </div>
+                <div class="project-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-green-300">Agile Project Plan</h3>
+                    <p>Created a sample Agile project plan for a cloud migration, demonstrating project management expertise.</p>
+                    <a href="https://github.com/[YourGitHubUsername]/agile-plan" class="text-green-400 hover:underline">View on GitHub</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section bg-gray-900">
+        <div class="container mx-auto text-center fade-in">
+            <h2 class="text-3xl font-bold mb-4 text-green-400">Contact Me</h2>
+            <p class="text-lg mb-4 glass p-6 rounded-lg">
+                Interested in collaborating? Reach out to discuss opportunities in project management, cloud, or AI-driven roles.
+            </p>
+            <p class="text-lg mb-4">Email: <a href="mailto:sanjaygaikwad2009@gmail.com" class="text-green-400 hover:underline">sanjaygaikwad2009@gmail.com</a></p>
+            <p class="text-lg mb-4">Phone: +91 9970021600</p>
+            <p class="text-lg">
+                <a href="[YourLinkedInURL]" class="text-green-400 hover:underline">LinkedIn</a> | 
+                <a href="[YourGitHubURL]" class="text-green-400 hover:underline">GitHub</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-blue-600 text-white p-4 text-center">
+        <p>© 2025 Sanjay Gaikwad. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Particles.js Configuration
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 100, density: { enable: true, value_area: 800 } },
+                color: { value: ["#00ff00", "#a855f7"] },
+                shape: { type: "circle" },
+                opacity: { value: 0.6, random: true },
+                size: { value: 4, random: true },
+                line_linked: { enable: true, distance: 120, color: "#a855f7", opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 5, direction: "none", random: true, out_mode: "out" }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+                modes: { grab: { distance: 200, line_linked: { opacity: 1 } }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Fade-in on scroll
+        const fadeIns = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        fadeIns.forEach(el => observer.observe(el));
+
+        // Custom cursor
+        const cursor = document.querySelector('.custom-cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.pageX + 'px';
+            cursor.style.top = e.pageY + 'px';
+        });
+
+        // Hamburger menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        hamburger.addEventListener('click', () => {
+            document.body.classList.toggle('nav-open');
+        });
+    </script>
+</body>
+</html>
